@@ -1,0 +1,38 @@
+.countdown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  pointer-events: none;
+}
+
+.countdown-number {
+  font-size: clamp(5rem, 18vw, 10rem);
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  animation: countdown-pop 1s ease-out;
+}
+
+.countdown-label {
+  margin-top: 12px;
+  font-size: 1.1rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes countdown-pop {
+  from {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+  }
+}
