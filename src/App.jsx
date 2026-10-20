@@ -17,6 +17,7 @@ function App() {
   const sessionActive = isRunning && photos.length < PHOTO_COUNT
   const stripReady = photos.length === PHOTO_COUNT
 
+  // Also used by Retake: clearing the photos and starting again is the same action.
   function startSession() {
     setPhotos([])
     setIsRunning(true)
@@ -48,21 +49,23 @@ function App() {
             )}
           </CameraView>
 
-          <div className="controls">
-            <button
-              className="btn btn-primary"
-              onClick={startSession}
-              disabled={status !== 'ready' || sessionActive}
-            >
-              {sessionActive ? 'Smile!' : 'Start'}
-            </button>
-          </div>
+          {!stripReady && (
+            <div className="controls">
+              <button
+                className="btn btn-primary"
+                onClick={startSession}
+                disabled={status !== 'ready' || sessionActive}
+              >
+                {sessionActive ? 'Smile!' : 'Start'}
+              </button>
+            </div>
+          )}
         </section>
 
         {stripReady && (
           <section className="strip-panel">
             <h2>Your strip</h2>
-            <PhotoStrip photos={photos} />
+            <PhotoStrip photos={photos} onRetake={startSession} />
           </section>
         )}
       </div>

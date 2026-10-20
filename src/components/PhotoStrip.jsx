@@ -15,7 +15,7 @@ function downloadCanvas(canvas, filename) {
 }
 
 // Builds the strip from the photos and shows a preview of it.
-function PhotoStrip({ photos }) {
+function PhotoStrip({ photos, onRetake }) {
   // useMemo: only redraw the strip when `photos` changes, not on every render.
   const strip = useMemo(() => buildStrip(photos), [photos])
   const previewUrl = useMemo(() => strip.toDataURL('image/png'), [strip])
@@ -31,6 +31,9 @@ function PhotoStrip({ photos }) {
       <div className="photo-strip-actions">
         <button className="btn btn-primary" onClick={handleDownload}>
           Download PNG
+        </button>
+        <button className="btn" onClick={onRetake}>
+          Retake
         </button>
       </div>
     </div>
