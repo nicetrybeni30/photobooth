@@ -1,121 +1,75 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { useCallback, useState } from 'react'
+import CameraView from './components/CameraView.jsx'
+import Countdown from './components/Countdown.jsx'
+import PhotoStrip from './components/PhotoStrip.jsx'
+import { useCamera } from './hooks/useCamera.js'
+import { captureFrame } from './utils/capture.js'
 import './App.css'
 
+const PHOTO_COUNT = 4
+
 function App() {
-  const [count, setCount] = useState(0)
+  const { videoRef, status, error } = useCamera()
+  const [photos, setPhotos] = useState([]) // array of <canvas> elements
+  const [isRunning, setIsRunning] = useState(false)
+
+  // Derived values, so there's no extra state to keep in sync.
+  const sessionActive = isRunning && photos.length < PHOTO_COUNT
+  const stripReady = photos.length === PHOTO_COUNT
+
+  // Also used by Retake: clearing the photos and starting again is the same action.
+  function startSession() {
+    setPhotos([])
+    setIsRunning(true)
+  }
+
+  // useCallback keeps the same function between renders, so the Countdown's
+  // effect doesn't restart its timer just because App re-rendered.
+  const takePhoto = useCallback(() => {
+    const frame = captureFrame(videoRef.current)
+    setPhotos((prev) => [...prev, frame])
+  }, [videoRef])
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <main className="app">
+      <header className="app-header">
+        <h1>Photobooth</h1>
+        <p>Strike a pose. 4 photos, one strip.</p>
+      </header>
 
-      <div className="ticks"></div>
+      <div className={stripReady ? 'layout layout-with-strip' : 'layout'}>
+        <section className="booth">
+          <CameraView videoRef={videoRef} status={status} error={error}>
+            {sessionActive && (
+              <Countdown
+                key={photos.length}
+                label={`Photo ${photos.length + 1} of ${PHOTO_COUNT}`}
+                onDone={takePhoto}
+              />
+            )}
+          </CameraView>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          {!stripReady && (
+            <div className="controls">
+              <button
+                className="btn btn-primary"
+                onClick={startSession}
+                disabled={status !== 'ready' || sessionActive}
+              >
+                {sessionActive ? 'Smile!' : 'Start'}
+              </button>
+            </div>
+          )}
+        </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        {stripReady && (
+          <section className="strip-panel">
+            <h2>Your strip</h2>
+            <PhotoStrip photos={photos} onRetake={startSession} />
+          </section>
+        )}
+      </div>
+    </main>
   )
 }
 
