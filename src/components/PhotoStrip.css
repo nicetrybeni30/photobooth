@@ -12,3 +12,10 @@
   height: auto;
   box-shadow: var(--shadow);
 }
+
+.photo-strip-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
