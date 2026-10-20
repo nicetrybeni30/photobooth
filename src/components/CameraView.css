@@ -1,0 +1,37 @@
+.camera-view {
+  position: relative;
+  width: 100%;
+  min-height: 240px;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.camera-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Flip horizontally so it feels like a mirror (selfie view). */
+  transform: scaleX(-1);
+}
+
+.camera-message {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 24px;
+  color: #fff;
+  text-align: center;
+}
+
+.camera-error p {
+  margin: 0;
+  max-width: 420px;
+  color: #ddd;
+}
