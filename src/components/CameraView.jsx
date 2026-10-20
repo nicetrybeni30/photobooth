@@ -1,8 +1,8 @@
 import './CameraView.css'
 
 // Shows the live camera. `children` is drawn on top of the video
-// (used for the countdown overlay).
-function CameraView({ videoRef, status, error, children }) {
+// (used for the countdown overlay). `filterId` previews a photo filter live.
+function CameraView({ videoRef, status, error, filterId = 'color', children }) {
   return (
     <div className="camera-view">
       {/* The <video> is always rendered so videoRef points at it before the camera starts. */}
@@ -10,6 +10,7 @@ function CameraView({ videoRef, status, error, children }) {
         ref={videoRef}
         className="camera-video"
         hidden={status === 'error'}
+        style={{ filter: filterId === 'color' ? 'none' : `url(#filter-${filterId})` }}
         autoPlay
         playsInline
         muted
