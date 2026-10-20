@@ -1,75 +1,173 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import CameraView from './components/CameraView.jsx'
+import ChoicePicker from './components/ChoicePicker.jsx'
 import Countdown from './components/Countdown.jsx'
-import PhotoStrip from './components/PhotoStrip.jsx'
+import FilterDefs from './components/FilterDefs.jsx'
+import PrintTray from './components/PrintTray.jsx'
+import ShotSlots from './components/ShotSlots.jsx'
+import StepPlate from './components/StepPlate.jsx'
 import { useCamera } from './hooks/useCamera.js'
 import { captureFrame } from './utils/capture.js'
+import { downloadCanvas, localDateStamp } from './utils/download.js'
+import { FILTERS, getFilter } from './utils/filters.js'
+import { PAPERS, getPaper } from './utils/papers.js'
+import { buildStrip } from './utils/strip.js'
 import './App.css'
 
 const PHOTO_COUNT = 4
+const STEPS = ['filter', 'shoot', 'paper', 'print']
+
+const filterSwatch = (f) => ({
+  background: 'linear-gradient(135deg, #e8546b, #f6c35c 50%, #4fa6d8)',
+  filter: f.matrix ? `url(#filter-${f.id})` : 'none',
+})
+const paperSwatch = (p) => ({ background: p.bg })
 
 function App() {
   const { videoRef, status, error } = useCamera()
+  const [step, setStep] = useState('filter')
+  const [filterId, setFilterId] = useState('bw')
+  const [paperId, setPaperId] = useState('white')
   const [photos, setPhotos] = useState([]) // array of <canvas> elements
-  const [isRunning, setIsRunning] = useState(false)
+  const [flashes, setFlashes] = useState(0) // bumps on every shot to replay the flash
 
-  // Derived values, so there's no extra state to keep in sync.
-  const sessionActive = isRunning && photos.length < PHOTO_COUNT
-  const stripReady = photos.length === PHOTO_COUNT
+  const shooting = step === 'shoot' && photos.length < PHOTO_COUNT
 
-  // Also used by Retake: clearing the photos and starting again is the same action.
-  function startSession() {
+  // The strip is rebuilt whenever the photos or the paper color change.
+  const strip = useMemo(
+    () => (photos.length === PHOTO_COUNT ? buildStrip(photos, getPaper(paperId)) : null),
+    [photos, paperId],
+  )
+  const stripUrl = useMemo(() => strip?.toDataURL('image/png'), [strip])
+
+  // After the last photo, wait a moment (so you see the 4th slot fill), then go to paper.
+  useEffect(() => {
+    if (step !== 'shoot' || photos.length < PHOTO_COUNT) return
+    const id = setTimeout(() => setStep('paper'), 900)
+    return () => clearTimeout(id)
+  }, [step, photos.length])
+
+  function startShooting() {
     setPhotos([])
-    setIsRunning(true)
+    setStep('shoot')
   }
 
-  // useCallback keeps the same function between renders, so the Countdown's
-  // effect doesn't restart its timer just because App re-rendered.
+  function retake() {
+    setPhotos([])
+    setStep('filter')
+  }
+
+  // useCallback keeps the same function while the countdown runs, so its timer isn't restarted.
   const takePhoto = useCallback(() => {
-    const frame = captureFrame(videoRef.current)
+    const frame = captureFrame(videoRef.current, getFilter(filterId).matrix)
     setPhotos((prev) => [...prev, frame])
-  }, [videoRef])
+    setFlashes((n) => n + 1)
+  }, [videoRef, filterId])
+
+  function download() {
+    downloadCanvas(strip, `photobooth-${localDateStamp()}.png`)
+  }
+
+  const showCamera = step === 'filter' || step === 'shoot'
 
   return (
-    <main className="app">
-      <header className="app-header">
-        <h1>Photobooth</h1>
-        <p>Strike a pose. 4 photos, one strip.</p>
-      </header>
+    <div className="scene">
+      <FilterDefs />
+      <main className="booth">
+        <section className="booth-panel">
+          <div className="lens" aria-hidden="true" />
+          <StepPlate current={STEPS.indexOf(step)} />
 
-      <div className={stripReady ? 'layout layout-with-strip' : 'layout'}>
-        <section className="booth">
-          <CameraView videoRef={videoRef} status={status} error={error}>
-            {sessionActive && (
-              <Countdown
-                key={photos.length}
-                label={`Photo ${photos.length + 1} of ${PHOTO_COUNT}`}
-                onDone={takePhoto}
-              />
-            )}
-          </CameraView>
-
-          {!stripReady && (
-            <div className="controls">
-              <button
-                className="btn btn-primary"
-                onClick={startSession}
-                disabled={status !== 'ready' || sessionActive}
+          <div className="screen-bezel">
+            <div className="screen">
+              <CameraView
+                videoRef={videoRef}
+                status={status}
+                error={error}
+                filterId={filterId}
+                hidden={!showCamera}
               >
-                {sessionActive ? 'Smile!' : 'Start'}
-              </button>
+                {flashes > 0 && step === 'shoot' && <div key={flashes} className="flash" />}
+
+                {step === 'filter' && status === 'ready' && (
+                  <div className="screen-bar">
+                    <h2 className="screen-title">Choose a filter</h2>
+                    <ChoicePicker
+                      label="Filter"
+                      options={FILTERS}
+                      value={filterId}
+                      onChange={setFilterId}
+                      swatchStyle={filterSwatch}
+                    />
+                    <button className="btn btn-primary" onClick={startShooting}>
+                      Start
+                    </button>
+                  </div>
+                )}
+
+                {step === 'shoot' && (
+                  <>
+                    {shooting && (
+                      <Countdown
+                        key={photos.length}
+                        label={`Photo ${photos.length + 1} of ${PHOTO_COUNT}`}
+                        onDone={takePhoto}
+                      />
+                    )}
+                    <div className="screen-bottom">
+                      <ShotSlots photos={photos} total={PHOTO_COUNT} />
+                    </div>
+                  </>
+                )}
+              </CameraView>
+
+              {step === 'paper' && (
+                <div className="screen-panel">
+                  <img className="strip-preview" src={stripUrl} alt="Photo strip preview" />
+                  <div className="screen-panel-controls">
+                    <h2 className="screen-title">Pick your paper</h2>
+                    <ChoicePicker
+                      label="Paper color"
+                      options={PAPERS}
+                      value={paperId}
+                      onChange={setPaperId}
+                      swatchStyle={paperSwatch}
+                    />
+                    <div className="screen-actions">
+                      <button className="btn btn-primary" onClick={() => setStep('print')}>
+                        Print
+                      </button>
+                      <button className="btn" onClick={retake}>
+                        Retake
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {step === 'print' && (
+                <div className="screen-panel screen-panel-center">
+                  <div className="screen-panel-controls">
+                    <h2 className="screen-title big">Grab your print!</h2>
+                    <p className="screen-note">Your strip is coming out of the print slot.</p>
+                    <div className="screen-actions">
+                      <button className="btn btn-primary" onClick={download}>
+                        Download PNG
+                      </button>
+                      <button className="btn" onClick={retake}>
+                        Retake
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </section>
 
-        {stripReady && (
-          <section className="strip-panel">
-            <h2>Your strip</h2>
-            <PhotoStrip photos={photos} onRetake={startSession} />
-          </section>
-        )}
-      </div>
-    </main>
+        <PrintTray stripUrl={stripUrl} printed={step === 'print'} />
+      </main>
+    </div>
   )
 }
 

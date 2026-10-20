@@ -1,30 +1,14 @@
+/* The booth always looks the same (curtain room + steel), so there's no light/dark switch. */
 :root {
-  --text: #2b2730;
-  --muted: #6b6375;
-  --bg: #f6f3ee;
-  --surface: #ffffff;
-  --border: #e2ddd5;
-  --accent: #e2445c;
-  --accent-text: #ffffff;
-  --shadow: rgba(0, 0, 0, 0.12) 0 8px 24px -6px;
+  --ink: #f3efe6;
+  --muted: rgba(243, 239, 230, 0.75);
+  --accent: #c8102e;
+  --accent-hover: #a50d26;
 
   font: 16px/1.5 system-ui, 'Segoe UI', Roboto, sans-serif;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  color-scheme: dark;
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #f1eef5;
-    --muted: #a49cae;
-    --bg: #17151b;
-    --surface: #221f27;
-    --border: #35303c;
-    --accent: #ff5c74;
-    --shadow: rgba(0, 0, 0, 0.5) 0 8px 24px -6px;
-  }
 }
 
 * {
@@ -33,10 +17,14 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  background: #3b0509;
 }
 
 button {
   font: inherit;
   cursor: pointer;
+}
+
+[hidden] {
+  display: none !important;
 }

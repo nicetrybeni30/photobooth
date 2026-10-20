@@ -11,7 +11,8 @@
 }
 
 .countdown-number {
-  font-size: clamp(5rem, 18vw, 10rem);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(5rem, 16vw, 9rem);
   font-weight: 700;
   line-height: 1;
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
@@ -20,7 +21,10 @@
 
 .countdown-label {
   margin-top: 12px;
-  font-size: 1.1rem;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
