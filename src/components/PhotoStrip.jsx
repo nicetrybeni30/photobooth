@@ -10,7 +10,8 @@ function downloadCanvas(canvas, filename) {
     link.href = url
     link.download = filename
     link.click()
-    URL.revokeObjectURL(url) // free the memory the blob URL was holding
+    // Free the memory the blob URL holds. Wait a moment: Safari can cancel the download if it's revoked right away.
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
   }, 'image/png')
 }
 
@@ -21,7 +22,10 @@ function PhotoStrip({ photos, onRetake }) {
   const previewUrl = useMemo(() => strip.toDataURL('image/png'), [strip])
 
   function handleDownload() {
-    const today = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
+    // Local date as YYYY-MM-DD (toISOString would give the UTC date, which can be a day off).
+    const now = new Date()
+    const pad = (n) => String(n).padStart(2, '0')
+    const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
     downloadCanvas(strip, `photobooth-${today}.png`)
   }
 
