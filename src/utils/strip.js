@@ -1,11 +1,11 @@
 const STRIP_WIDTH = 600
-const PADDING = 30 // white border around the photos
-const GAP = 20 // white space between photos
-const FOOTER_HEIGHT = 90
+const PADDING = 36 // paper border around the photos
+const GAP = 18 // paper between photos
+const FOOTER_HEIGHT = 150
 
-// Draws the photos stacked vertically on one white canvas,
-// with a footer showing today's date. Returns the canvas.
-export function buildStrip(photos, date = new Date()) {
+// Draws the photos stacked vertically on one canvas in the chosen paper color,
+// with a footer showing the booth name and today's date. Returns the canvas.
+export function buildStrip(photos, paper, date = new Date()) {
   const photoWidth = STRIP_WIDTH - PADDING * 2
   // All photos come from the same camera, so they share one aspect ratio.
   const photoHeight = Math.round(photoWidth * (photos[0].height / photos[0].width))
@@ -16,7 +16,7 @@ export function buildStrip(photos, date = new Date()) {
     PADDING + photos.length * photoHeight + (photos.length - 1) * GAP + FOOTER_HEIGHT
 
   const ctx = canvas.getContext('2d')
-  ctx.fillStyle = '#ffffff'
+  ctx.fillStyle = paper.bg
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   photos.forEach((photo, i) => {
@@ -26,18 +26,20 @@ export function buildStrip(photos, date = new Date()) {
 
   const footerTop = canvas.height - FOOTER_HEIGHT
   const centerX = canvas.width / 2
-  ctx.fillStyle = '#2b2730'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  ctx.font = '600 26px system-ui, "Segoe UI", Roboto, sans-serif'
-  ctx.fillText('Photobooth', centerX, footerTop + FOOTER_HEIGHT * 0.42)
-  ctx.fillStyle = '#6b6375'
-  ctx.font = '18px system-ui, "Segoe UI", Roboto, sans-serif'
-  ctx.fillText(
-    date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }),
-    centerX,
-    footerTop + FOOTER_HEIGHT * 0.72,
-  )
+
+  // The fonts are loaded in index.html; if one isn't ready yet, the fallback is used.
+  ctx.fillStyle = paper.ink
+  ctx.font = '64px "Great Vibes", cursive'
+  ctx.fillText('Photobooth', centerX, footerTop + FOOTER_HEIGHT * 0.45)
+
+  ctx.fillStyle = paper.subInk
+  ctx.font = '600 20px "Cormorant Garamond", Georgia, serif'
+  const dateText = date
+    .toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+    .toUpperCase()
+  ctx.fillText(dateText, centerX, footerTop + FOOTER_HEIGHT * 0.78)
 
   return canvas
 }
