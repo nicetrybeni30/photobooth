@@ -1,17 +1,21 @@
 .camera-view {
   position: relative;
   width: 100%;
-  min-height: 240px;
   background: #000;
-  border-radius: 12px;
   overflow: hidden;
-  box-shadow: var(--shadow);
+}
+
+.camera-view[hidden] {
+  display: none;
 }
 
 .camera-video {
   display: block;
   width: 100%;
-  height: auto;
+  min-height: 200px;
+  /* Same 4:3 center crop as the captured photo (see utils/capture.js). */
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
   /* Flip horizontally so it feels like a mirror (selfie view). */
   transform: scaleX(-1);
 }

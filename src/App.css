@@ -1,49 +1,258 @@
-.app {
+/* ---------- Room: red velvet curtain with ceiling lights ---------- */
+.scene {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 72px 16px 48px;
+  overflow: hidden;
+  background:
+    /* ceiling lights */
+    radial-gradient(circle at 18% -40px, rgba(255, 246, 225, 0.55), transparent 170px),
+    radial-gradient(circle at 50% -40px, rgba(255, 246, 225, 0.6), transparent 190px),
+    radial-gradient(circle at 82% -40px, rgba(255, 246, 225, 0.55), transparent 170px),
+    /* darker toward the floor */
+    linear-gradient(to bottom, transparent 40%, rgba(0, 0, 0, 0.55)),
+    /* two layers of folds with different widths so they don't look too regular */
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.35) 0,
+      rgba(0, 0, 0, 0) 22px,
+      rgba(255, 255, 255, 0.08) 38px,
+      rgba(0, 0, 0, 0) 54px,
+      rgba(0, 0, 0, 0.35) 76px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #5e0710 0,
+      #9b1222 30px,
+      #c21a2e 58px,
+      #9b1222 86px,
+      #5e0710 118px
+    );
+}
+
+/* Ceiling strip with the light fixtures. */
+.scene::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 40px;
+  background:
+    radial-gradient(circle at 18% 22px, #fffaf0 9px, #d8d2c4 12px, transparent 13px),
+    radial-gradient(circle at 50% 22px, #fffaf0 9px, #d8d2c4 12px, transparent 13px),
+    radial-gradient(circle at 82% 22px, #fffaf0 9px, #d8d2c4 12px, transparent 13px),
+    linear-gradient(#2a0306, #4a070d);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- Booth layout ---------- */
+.booth {
+  display: grid;
+  grid-template-columns: minmax(0, 720px) 220px;
+  justify-content: center;
+  align-items: start;
+  gap: 28px;
   max-width: 1000px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
 }
 
-.app-header {
-  text-align: center;
-  margin-bottom: 24px;
+@media (max-width: 860px) {
+  .booth {
+    grid-template-columns: minmax(0, 720px);
+  }
+  .print-tray {
+    max-width: 260px;
+    width: 100%;
+    margin: 0 auto;
+  }
 }
 
-.app-header h1 {
+/* ---------- Brushed stainless-steel panel ---------- */
+.booth-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 24px clamp(14px, 4vw, 36px) 32px;
+  border-radius: 14px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, rgba(0, 0, 0, 0.03) 1px 2px, transparent 2px 4px),
+    linear-gradient(
+      100deg,
+      #a7abb0 0%,
+      #e9ebed 18%,
+      #c3c6ca 34%,
+      #f2f3f4 52%,
+      #b4b8bc 70%,
+      #dcdfe1 86%,
+      #9fa3a8 100%
+    );
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.2),
+    0 24px 50px rgba(0, 0, 0, 0.55);
+}
+
+.booth-panel > .step-plate {
+  width: 100%;
+  max-width: 560px;
+}
+
+/* Round camera lens at the top, like the real booth. */
+.lens {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 40% 38%, rgba(255, 255, 255, 0.55) 0 3px, transparent 4px),
+    radial-gradient(circle, #23262b 0 12px, #08090b 13px 18px, #3a3e44 19px 21px, transparent 22px),
+    radial-gradient(circle, #f4f5f6 0 26px, #8e9297 27px 29px, #c7cacd 30px);
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.8),
+    0 3px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* Recessed screen with a thick steel bezel. */
+.screen-bezel {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  background: linear-gradient(160deg, #8b8f94, #d9dcdf 45%, #7d8186);
+  box-shadow:
+    inset 0 3px 8px rgba(0, 0, 0, 0.45),
+    0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.screen {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #0b0b0c;
+  box-shadow: inset 0 0 0 2px #000;
+}
+
+/* ---------- Things drawn on the screen ---------- */
+.screen-bar,
+.screen-bottom {
+  position: absolute;
+  inset: auto 0 0;
+}
+
+.screen-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 12px 14px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.45) 70%, transparent);
+}
+
+.screen-title {
   margin: 0;
-  font-size: 2.25rem;
+  color: var(--ink);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
-.app-header p {
-  margin: 4px 0 0;
+.screen-title.big {
+  font-size: 2.2rem;
+}
+
+.screen-note {
+  margin: 0;
   color: var(--muted);
 }
 
-.booth {
+/* Full-screen panels for the paper and print steps (same 4:3 size as the camera). */
+.screen-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  aspect-ratio: 4 / 3;
+  padding: 20px;
+  background: radial-gradient(circle at 50% 30%, #2a2a2e, #0b0b0c 75%);
+}
+
+.screen-panel-controls {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
 }
 
-.controls {
+.strip-preview {
+  height: 100%;
+  max-height: 440px;
+  width: auto;
+  min-width: 0;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 560px) {
+  .screen-panel:not(.screen-panel-center) {
+    flex-direction: column;
+    aspect-ratio: auto;
+  }
+  .strip-preview {
+    height: auto;
+    max-height: none;
+    width: 45%;
+  }
+}
+
+.screen-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
 }
 
+/* White camera flash after each photo. */
+.flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  pointer-events: none;
+  animation: flash 0.6s ease-out forwards;
+}
+
+@keyframes flash {
+  from {
+    opacity: 0.95;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ---------- Buttons (touchscreen style) ---------- */
 .btn {
-  padding: 12px 28px;
-  border: 1px solid var(--border);
+  padding: 10px 26px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 999px;
-  background: var(--surface);
-  color: var(--text);
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .btn-primary {
   border-color: var(--accent);
   background: var(--accent);
-  color: var(--accent-text);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
 }
 
 .btn:disabled {
@@ -51,23 +260,11 @@
   cursor: not-allowed;
 }
 
-.layout {
-  display: grid;
-  gap: 24px;
-}
-
-@media (min-width: 760px) {
-  .layout-with-strip {
-    grid-template-columns: 1fr 280px;
-    align-items: start;
+/* On small screens the camera is too short to cover with controls, so they sit below it. */
+@media (max-width: 560px) {
+  .screen-bar {
+    position: static;
+    padding-top: 14px;
+    background: #111;
   }
-}
-
-.strip-panel {
-  text-align: center;
-}
-
-.strip-panel h2 {
-  margin: 0 0 12px;
-  font-size: 1.25rem;
 }
